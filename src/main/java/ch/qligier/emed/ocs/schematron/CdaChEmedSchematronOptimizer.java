@@ -78,7 +78,7 @@ public class CdaChEmedSchematronOptimizer {
                             } else if (child instanceof SchematronReport) {
                                 return roleToKeep.equals(((SchematronReport) child).getRole());
                             } else {
-                                return false;
+                                return true; // Keep the variables
                             }
                         }).collect(Collectors.toList())
                 );

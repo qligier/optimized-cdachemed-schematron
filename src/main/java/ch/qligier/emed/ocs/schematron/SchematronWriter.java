@@ -14,8 +14,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -197,8 +197,10 @@ public class SchematronWriter {
             children.remove(index);
             final List<SchematronRuleChild> newChildren =
                 resolveExtendedChildren(definition, definition.getDefinedRules().get(extend.getExtendsRuleId()));
-            Collections.reverse(newChildren);
-            newChildren.forEach(newChild -> children.add(index, newChild));
+            final ListIterator<SchematronRuleChild> listIterator = newChildren.listIterator(newChildren.size());
+            while (listIterator.hasPrevious()) {
+                children.add(index, listIterator.previous());
+            }
         }
         return children;
     }

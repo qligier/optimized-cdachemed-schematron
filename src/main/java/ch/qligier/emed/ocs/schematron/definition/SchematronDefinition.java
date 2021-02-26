@@ -76,8 +76,10 @@ public class SchematronDefinition {
             final SchematronExtends extend = (SchematronExtends) children.get(index);
             children.remove(index);
             final List<SchematronRuleChild> newChildren = resolveExtendedChildren(this.getDefinedRules().get(extend.getExtendsRuleId()));
-            Collections.reverse(newChildren);
-            newChildren.forEach(newChild -> children.add(index, newChild));
+            final ListIterator<SchematronRuleChild> listIterator = newChildren.listIterator(newChildren.size());
+            while (listIterator.hasPrevious()) {
+                children.add(index, listIterator.previous());
+            }
         }
         return children;
     }
