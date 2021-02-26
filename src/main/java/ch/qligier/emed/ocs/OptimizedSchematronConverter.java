@@ -107,7 +107,7 @@ public class OptimizedSchematronConverter {
         System.out.println("- Cleaning the 'include/' directory");
 
         final List<String> xsltContents = Utils.listFiles(new File(SCHEMATRON_OUTPUT_DIR)).stream()
-            .filter(file -> file.getName().endsWith(".sch"))
+            .filter(file -> file.getName().endsWith(".xslt"))
             .map(Utils::readFileToString)
             .collect(Collectors.toList());
 
