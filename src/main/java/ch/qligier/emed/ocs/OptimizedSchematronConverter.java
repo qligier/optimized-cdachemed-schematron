@@ -34,6 +34,8 @@ public class OptimizedSchematronConverter {
         "cdachemed-MTP", "cdachemed-PRE", "cdachemed-DIS", "cdachemed-PADV", "cdachemed-PML", "cdachemed-PMLC"
     );
 
+    private static final String INCLUDE_DIR = "include/";
+
     private static final Logger LOG = Logger.getLogger(OptimizedSchematronConverter.class.getName());
 
     /**
@@ -41,11 +43,11 @@ public class OptimizedSchematronConverter {
      */
     public static void main(final String[] args) throws Exception {
         final File outputDir = new File(SCHEMATRON_OUTPUT_DIR);
-        if (outputDir.isDirectory() && !outputDir.delete()) {
-            LOG.severe("The output directory already exists and isn't empty. Please empty or delete it");
-            return;
+        if (outputDir.isDirectory()) {
+            Files.delete(outputDir.toPath());
+
         }
-        outputDir.mkdirs();
+        Files.createDirectories(outputDir.toPath());
 
         copyIncludes();
         for (final String schematronFilename : SCHEMATRON_FILES) {
@@ -85,7 +87,7 @@ public class OptimizedSchematronConverter {
         CdaChEmedSchematronOptimizer.optimizeSchematron(schematronFile, optimizedSchematronFile, roleToKeep);
         LOG.info("  + Converting it to XSLT");
         CdaChEmedSchematronOptimizer.convertToXslt(optimizedSchematronFile, xsltFile);
-        optimizedSchematronFile.delete();
+        Files.delete(optimizedSchematronFile.toPath());
         LOG.info("  + Done");
     }
 
@@ -95,18 +97,18 @@ public class OptimizedSchematronConverter {
      */
     private static void copyIncludes() throws IOException {
         LOG.info("- Copying 'includes/' directory");
-        final File srcDirectory = Path.of(SCHEMATRON_INPUT_DIR, "include/").toFile();
-        final File distDirectory = Path.of(SCHEMATRON_OUTPUT_DIR, "include/").toFile();
-        distDirectory.mkdirs();
+        final File srcDirectory = Path.of(SCHEMATRON_INPUT_DIR, INCLUDE_DIR).toFile();
+        final File distDirectory = Path.of(SCHEMATRON_OUTPUT_DIR, INCLUDE_DIR).toFile();
+        Files.createDirectories(distDirectory.toPath());
         for (final File srcFile : Utils.listFiles(srcDirectory)) {
-            Files.copy(srcFile.toPath(), Path.of(SCHEMATRON_OUTPUT_DIR, "include/", srcFile.getName()));
+            Files.copy(srcFile.toPath(), Path.of(SCHEMATRON_OUTPUT_DIR, INCLUDE_DIR, srcFile.getName()));
         }
     }
 
     /**
      * Clean the 'include/' directory by deleting all files that are not used by the Schematron.
      */
-    private static void cleanIncludes() {
+    private static void cleanIncludes() throws IOException {
         LOG.info("- Cleaning the 'include/' directory");
 
         final List<String> xsltContents = Utils.listFiles(new File(SCHEMATRON_OUTPUT_DIR)).stream()
@@ -114,12 +116,12 @@ public class OptimizedSchematronConverter {
             .map(Utils::readFileToString)
             .collect(Collectors.toList());
 
-        final File dir = new File(SCHEMATRON_OUTPUT_DIR + "include/");
+        final File dir = new File(SCHEMATRON_OUTPUT_DIR + INCLUDE_DIR);
         int nbDeletedFiles = 0;
         for (final File includeFile : Utils.listFiles(dir)) {
             // Only the value set files (starting with "voc-") are still linked
             if (!includeFile.getName().startsWith("voc-")) {
-                includeFile.delete();
+                Files.delete(includeFile.toPath());
                 ++nbDeletedFiles;
                 continue;
             }
@@ -134,7 +136,7 @@ public class OptimizedSchematronConverter {
             }
 
             if (deleteInclude) {
-                includeFile.delete();
+                Files.delete(includeFile.toPath());
                 ++nbDeletedFiles;
             }
         }

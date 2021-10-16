@@ -25,6 +25,8 @@ public class Utils {
 
     private static final Logger LOG = Logger.getLogger(Utils.class.getName());
 
+    private Utils() {}
+
     /**
      * Returns the index in a given list of the first element that satisfies the provided predicate or {@code -1} if the
      * list has no such elements.
@@ -59,9 +61,7 @@ public class Utils {
     public static DocumentBuilder newSafeDocumentBuilder() throws ParserConfigurationException {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
         factory.setNamespaceAware(true);
-        factory.setCoalescing(true);       // Required by OpenSAML 3.4
-        factory.setIgnoringComments(true); // Required by OpenSAML 3.4
-        factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setFeature("http://apache.org/xml/features/xinclude", false);
         factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
@@ -128,10 +128,4 @@ public class Utils {
             return "";
         }
     }
-
-    public static boolean fileContainString(@NonNull final File file,
-                                            @NonNull final String string) {
-        return true;
-    }
-
 }
