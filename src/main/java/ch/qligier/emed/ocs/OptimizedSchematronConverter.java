@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -33,13 +34,15 @@ public class OptimizedSchematronConverter {
         "cdachemed-MTP", "cdachemed-PRE", "cdachemed-DIS", "cdachemed-PADV", "cdachemed-PML", "cdachemed-PMLC"
     );
 
+    private static final Logger LOG = Logger.getLogger(OptimizedSchematronConverter.class.getName());
+
     /**
      * @param args
      */
     public static void main(final String[] args) throws Exception {
         final File outputDir = new File(SCHEMATRON_OUTPUT_DIR);
         if (outputDir.isDirectory() && !outputDir.delete()) {
-            System.out.println("[ERROR] The output directory already exists and isn't empty. Please empty or delete it");
+            LOG.severe("The output directory already exists and isn't empty. Please empty or delete it");
             return;
         }
         outputDir.mkdirs();
@@ -57,7 +60,7 @@ public class OptimizedSchematronConverter {
                 "error");
         }
         cleanIncludes();
-        System.out.println("End of conversion");
+        LOG.info("End of conversion");
     }
 
     /**
@@ -71,19 +74,19 @@ public class OptimizedSchematronConverter {
     private static void optimizeSchematronFile(@NonNull final File schematronFile,
                                                @NonNull final File xsltFile,
                                                final String roleToKeep) throws Exception {
-        System.out.println("- Transforming " + schematronFile.getName());
+        LOG.info("- Transforming " + schematronFile.getName());
         final File optimizedSchematronFile = File.createTempFile("cdachemed_", "_sch");
         optimizedSchematronFile.deleteOnExit();
         if (!schematronFile.isFile() || !schematronFile.canRead()) {
             throw new FileNotFoundException("The Schematron file cannot be found: " + schematronFile);
         }
 
-        System.out.println("  + Optimizing the Schematron definition");
+        LOG.info("  + Optimizing the Schematron definition");
         CdaChEmedSchematronOptimizer.optimizeSchematron(schematronFile, optimizedSchematronFile, roleToKeep);
-        System.out.println("  + Converting it to XSLT");
+        LOG.info("  + Converting it to XSLT");
         CdaChEmedSchematronOptimizer.convertToXslt(optimizedSchematronFile, xsltFile);
         optimizedSchematronFile.delete();
-        System.out.println("  + Done");
+        LOG.info("  + Done");
     }
 
     /**
@@ -91,7 +94,7 @@ public class OptimizedSchematronConverter {
      * @throws IOException
      */
     private static void copyIncludes() throws IOException {
-        System.out.println("- Copying 'includes/' directory");
+        LOG.info("- Copying 'includes/' directory");
         final File srcDirectory = Path.of(SCHEMATRON_INPUT_DIR, "include/").toFile();
         final File distDirectory = Path.of(SCHEMATRON_OUTPUT_DIR, "include/").toFile();
         distDirectory.mkdirs();
@@ -104,7 +107,7 @@ public class OptimizedSchematronConverter {
      * Clean the 'include/' directory by deleting all files that are not used by the Schematron.
      */
     private static void cleanIncludes() {
-        System.out.println("- Cleaning the 'include/' directory");
+        LOG.info("- Cleaning the 'include/' directory");
 
         final List<String> xsltContents = Utils.listFiles(new File(SCHEMATRON_OUTPUT_DIR)).stream()
             .filter(file -> file.getName().endsWith(".xslt"))
@@ -135,6 +138,6 @@ public class OptimizedSchematronConverter {
                 ++nbDeletedFiles;
             }
         }
-        System.out.println("  + Cleaned " + nbDeletedFiles + " useless includes");
+        LOG.info("  + Cleaned " + nbDeletedFiles + " useless includes");
     }
 }
