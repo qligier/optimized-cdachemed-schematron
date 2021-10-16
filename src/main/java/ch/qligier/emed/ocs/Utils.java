@@ -10,10 +10,11 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,6 +22,10 @@ import java.util.stream.Stream;
  *
  */
 public class Utils {
+
+    private static final Logger LOG = Logger.getLogger(Utils.class.getName());
+
+    private Utils() {}
 
     /**
      * Returns the index in a given list of the first element that satisfies the provided predicate or {@code -1} if the
@@ -56,9 +61,7 @@ public class Utils {
     public static DocumentBuilder newSafeDocumentBuilder() throws ParserConfigurationException {
         final DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
         factory.setNamespaceAware(true);
-        factory.setCoalescing(true);       // Required by OpenSAML 3.4
-        factory.setIgnoringComments(true); // Required by OpenSAML 3.4
-        factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing", true);
+        factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
         factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         factory.setFeature("http://apache.org/xml/features/xinclude", false);
         factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
@@ -121,14 +124,8 @@ public class Utils {
             }
             return resultStringBuilder.toString();
         } catch (final Exception exception) {
-            exception.printStackTrace();
+            LOG.log(Level.SEVERE, "Caught error in Utils.readFileToString", exception);
             return "";
         }
     }
-
-    public static boolean fileContainString(@NonNull final File file,
-                                            @NonNull final String string) {
-        return true;
-    }
-
 }
