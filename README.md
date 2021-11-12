@@ -7,8 +7,8 @@ The official CDA-CH-EMED Schematron definitions can be downloaded from
 [github.com/hl7ch/hl7ch-cda](https://github.com/hl7ch/hl7ch-cda/tree/master/schematrons/eHealthSuisse/eMedikation).
 
 The two following version of XSLT files are created:
-- `cdachemed-[type]-all.sch` contain all original rules;
-- `cdachemed-[type]-error.sch` contain only rules that have an 'error' role (this de facto excludes all 'reports').
+- `cdachemed-[type]-all.xslt` contain all original rules;
+- `cdachemed-[type]-error.xslt` contain only rules that have an 'error' role (this de facto excludes all 'reports').
 
 ## Usage
 
