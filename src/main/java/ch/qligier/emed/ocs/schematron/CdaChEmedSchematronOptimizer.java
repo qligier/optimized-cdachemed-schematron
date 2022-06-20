@@ -18,12 +18,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
- * The preprocessor of Schematron definition files to optimized XSLT files. XSLT files are then used to validate
+ * The preprocessor of Schematron definition files for optimizing XSLT files. XSLT files are then used to validate
  * CDA-CH-EMED files.
  *
  * @author Quentin Ligier
@@ -69,18 +70,18 @@ public class CdaChEmedSchematronOptimizer {
 
         for (final SchematronRule rule : definition.getDefinedRules().values()) {
             if (roleToKeep != null) {
-                // Remove all reports and all asserts whose role are different than roleToKeep
+                // Remove all reports and all asserts whose role are different from roleToKeep
                 rule.setChildren(
                     rule.getChildren().stream()
                         .filter((SchematronRuleChild child) -> {
-                            if (child instanceof SchematronAssert) {
-                                return roleToKeep.equals(((SchematronAssert) child).getRole());
-                            } else if (child instanceof SchematronReport) {
-                                return roleToKeep.equals(((SchematronReport) child).getRole());
+                            if (child instanceof final SchematronAssert schematronAssert) {
+                                return roleToKeep.equals(schematronAssert.getRole());
+                            } else if (child instanceof final SchematronReport schematronReport) {
+                                return roleToKeep.equals(schematronReport.getRole());
                             } else {
                                 return true; // Keep the variables
                             }
-                        }).collect(Collectors.toList())
+                        }).toList()
                 );
             }
 
@@ -89,8 +90,7 @@ public class CdaChEmedSchematronOptimizer {
                 rule.setContext(transform(rule.getContext()));
             }
             for (final SchematronRuleChild child : rule.getChildren()) {
-                if (child instanceof SchematronAssert) {
-                    final SchematronAssert childAssert = (SchematronAssert) child;
+                if (child instanceof final SchematronAssert childAssert) {
                     childAssert.setTest(transform(childAssert.getTest()));
                 }
             }

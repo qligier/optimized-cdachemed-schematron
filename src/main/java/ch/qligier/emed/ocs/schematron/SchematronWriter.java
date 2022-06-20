@@ -14,10 +14,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * A specialized class that can write an optimized Schematron file from a regular Schematron definition.
@@ -98,29 +95,29 @@ public class SchematronWriter {
                 ruleElement.setAttribute("context", rule.getContext());
 
                 for (final SchematronRuleChild child : rule.getChildren()) {
-                    if (child instanceof SchematronAssert) {
+                    if (child instanceof final SchematronAssert schematronAssert) {
                         final Element assertElement =
                             document.createElementNS(SchematronConstants.SCHEMATRON_NAMESPACE, SchematronConstants.ASSERT_TAG_NAME);
-                        assertElement.setAttribute("test", ((SchematronAssert) child).getTest());
-                        assertElement.setAttribute("role", ((SchematronAssert) child).getRole());
-                        for (final Node messageNode : ((SchematronAssert) child).getMessageNodes()) {
+                        assertElement.setAttribute("test", schematronAssert.getTest());
+                        assertElement.setAttribute("role", schematronAssert.getRole());
+                        for (final Node messageNode : schematronAssert.getMessageNodes()) {
                             assertElement.appendChild(document.importNode(messageNode, true));
                         }
                         ruleElement.appendChild(assertElement);
-                    } else if (child instanceof SchematronReport) {
+                    } else if (child instanceof final SchematronReport schematronReport) {
                         final Element reportElement =
                             document.createElementNS(SchematronConstants.SCHEMATRON_NAMESPACE, SchematronConstants.REPORT_TAG_NAME);
-                        reportElement.setAttribute("test", ((SchematronReport) child).getTest());
-                        reportElement.setAttribute("role", ((SchematronReport) child).getRole());
-                        for (final Node messageNode : ((SchematronReport) child).getMessageNodes()) {
+                        reportElement.setAttribute("test", schematronReport.getTest());
+                        reportElement.setAttribute("role", schematronReport.getRole());
+                        for (final Node messageNode : schematronReport.getMessageNodes()) {
                             reportElement.appendChild(document.importNode(messageNode, true));
                         }
                         ruleElement.appendChild(reportElement);
-                    } else if (child instanceof SchematronLet) {
+                    } else if (child instanceof final SchematronLet schematronLet) {
                         final Element letElement =
                             document.createElementNS(SchematronConstants.SCHEMATRON_NAMESPACE, SchematronConstants.LET_TAG_NAME);
-                        letElement.setAttribute("name", ((SchematronLet) child).getName());
-                        letElement.setAttribute("value", ((SchematronLet) child).getValue());
+                        letElement.setAttribute("name", schematronLet.getName());
+                        letElement.setAttribute("value", schematronLet.getValue());
                         ruleElement.appendChild(letElement);
                     }
                 }
@@ -158,9 +155,10 @@ public class SchematronWriter {
         // List of rules to process and return
         return definition.getRulesPerPattern().get(patternId).stream()
             .map(ruleId -> definition.getDefinedRules().get(ruleId))
+            .filter(Objects::nonNull)
             .filter(rule -> !rule.isAbstract())
             .map(rule -> optimizeRule(definition, rule))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     /**
@@ -190,9 +188,9 @@ public class SchematronWriter {
     @NonNull
     private List<SchematronRuleChild> resolveExtendedChildren(@NonNull final SchematronDefinition definition,
                                                               @NonNull final SchematronRule rule) {
-        final List<SchematronRuleChild> children = rule.getChildren();
-        if (children.stream().anyMatch(child -> child instanceof SchematronExtends)) {
-            final int index = Utils.listIndexOf(children, child -> child instanceof SchematronExtends);
+        final List<SchematronRuleChild> children = new ArrayList<>(rule.getChildren());
+        if (children.stream().anyMatch(SchematronExtends.class::isInstance)) {
+            final int index = Utils.listIndexOf(children, SchematronExtends.class::isInstance);
             final SchematronExtends extend = (SchematronExtends) children.get(index);
             children.remove(index);
             final List<SchematronRuleChild> newChildren =

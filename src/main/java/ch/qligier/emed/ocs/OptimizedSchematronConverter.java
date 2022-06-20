@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -113,8 +112,7 @@ public class OptimizedSchematronConverter {
 
         final List<String> xsltContents = Utils.listFiles(new File(SCHEMATRON_OUTPUT_DIR)).stream()
             .filter(file -> file.getName().endsWith(".xslt"))
-            .map(Utils::readFileToString)
-            .collect(Collectors.toList());
+            .map(Utils::readFileToString).toList();
 
         final File dir = new File(SCHEMATRON_OUTPUT_DIR + INCLUDE_DIR);
         int nbDeletedFiles = 0;

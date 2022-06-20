@@ -76,7 +76,7 @@ public class SchematronParser {
             }
             final Element element = (Element) nodes.item(i);
             switch (element.getNodeName()) {
-                case SchematronConstants.PATTERN_TAG_NAME:
+                case SchematronConstants.PATTERN_TAG_NAME -> {
                     final NodeList patternNodes = element.getChildNodes();
                     for (int j = 0; j < patternNodes.getLength(); ++j) {
                         if (patternNodes.item(j).getNodeType() != Node.ELEMENT_NODE) {
@@ -94,8 +94,8 @@ public class SchematronParser {
                             }
                         }
                     }
-                    break;
-                case SchematronConstants.INCLUDE_TAG_NAME:
+                }
+                case SchematronConstants.INCLUDE_TAG_NAME -> {
                     final String href = element.getAttribute("href");
                     if (href.isEmpty()) {
                         throw new SchematronParsingException("An 'include' element must have a valid 'href' attribute");
@@ -105,9 +105,9 @@ public class SchematronParser {
                     final Element includedDocRoot = includedDoc.getDocumentElement();
                     final Node replacingNode = doc.importNode(includedDocRoot, true);
                     root.replaceChild(replacingNode, element);
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
 
@@ -155,17 +155,16 @@ public class SchematronParser {
             }
             final Element element = (Element) nodes.item(i);
             switch (element.getNodeName()) {
-                case SchematronConstants.PATTERN_TAG_NAME:
+                case SchematronConstants.PATTERN_TAG_NAME ->
                     definition.getPatterns().add(SchematronPattern.fromPatternElement(element));
-                    break;
-                case SchematronConstants.RULE_TAG_NAME:
+                case SchematronConstants.RULE_TAG_NAME -> {
                     final String ruleId = element.getAttribute("id");
                     if (!definition.getDefinedRules().get(ruleId).isAbstract()) {
                         definition.getEnabledRules().add(ruleId);
                     }
-                    break;
-                default:
-                    break;
+                }
+                default -> {
+                }
             }
         }
 
