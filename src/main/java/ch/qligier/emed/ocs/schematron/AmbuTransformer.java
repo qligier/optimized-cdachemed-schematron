@@ -33,11 +33,9 @@ public class AmbuTransformer implements DefinitionTransformer {
         for (final SchematronRule rule : definition.getDefinedRules().values()) {
             for (final SchematronRuleChild child : rule.getChildren()) {
                 if (child instanceof final SchematronAssert asser && asser.getTest().contains("doc('include/voc")) {
-                    System.out.println("before");
                     for (final var entry : getValueSetReplacementMap().entrySet()) {
                         asser.setTest(asser.getTest().replace(entry.getKey(), entry.getValue()));
                     }
-                    System.out.println("after");
                 }
             }
         }
