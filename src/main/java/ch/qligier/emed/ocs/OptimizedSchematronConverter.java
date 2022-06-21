@@ -1,6 +1,8 @@
 package ch.qligier.emed.ocs;
 
+import ch.qligier.emed.ocs.schematron.AmbuTransformer;
 import ch.qligier.emed.ocs.schematron.CdaChEmedSchematronOptimizer;
+import ch.qligier.emed.ocs.schematron.DefinitionTransformer;
 import lombok.NonNull;
 
 import java.io.File;
@@ -48,16 +50,22 @@ public class OptimizedSchematronConverter {
         }
         Files.createDirectories(outputDir.toPath());
 
+        final List<DefinitionTransformer> definitionTransformers = List.of(
+            new AmbuTransformer()
+        );
+
         copyIncludes();
         for (final String schematronFilename : SCHEMATRON_FILES) {
             final File schematronFile = Path.of(SCHEMATRON_INPUT_DIR, schematronFilename + ".sch").toFile();
             optimizeSchematronFile(
                 schematronFile,
                 Path.of(SCHEMATRON_OUTPUT_DIR, schematronFilename + "-all.xslt").toFile(),
+                definitionTransformers,
                 null);
             optimizeSchematronFile(
                 schematronFile,
                 Path.of(SCHEMATRON_OUTPUT_DIR, schematronFilename + "-error.xslt").toFile(),
+                definitionTransformers,
                 "error");
         }
         cleanIncludes();
@@ -74,6 +82,7 @@ public class OptimizedSchematronConverter {
      */
     private static void optimizeSchematronFile(@NonNull final File schematronFile,
                                                @NonNull final File xsltFile,
+                                               @NonNull final List<DefinitionTransformer> definitionTransformers,
                                                final String roleToKeep) throws Exception {
         LOG.info("- Transforming " + schematronFile.getName());
         final File optimizedSchematronFile = File.createTempFile("cdachemed_", "_sch");
@@ -83,7 +92,8 @@ public class OptimizedSchematronConverter {
         }
 
         LOG.info("  + Optimizing the Schematron definition");
-        CdaChEmedSchematronOptimizer.optimizeSchematron(schematronFile, optimizedSchematronFile, roleToKeep);
+        CdaChEmedSchematronOptimizer.optimizeSchematron(schematronFile, optimizedSchematronFile,
+            definitionTransformers, roleToKeep);
         LOG.info("  + Converting it to XSLT");
         CdaChEmedSchematronOptimizer.convertToXslt(optimizedSchematronFile, xsltFile);
         Files.delete(optimizedSchematronFile.toPath());

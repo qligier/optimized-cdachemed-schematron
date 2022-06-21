@@ -42,7 +42,7 @@ public class CdaChEmedSchematronOptimizer {
     private static final Pattern WHITESPACES_IN_ATTR_SELECTOR_PATTERN = Pattern.compile("(\\[@[a-zA-Z0-9]+)\\s*=\\s*");
 
     /**
-     * Optimizes a Schematron file.
+     * Optimizes a Schematron file without any transformer.
      *
      * @param schematronFile The original Schematron file to convert.
      * @param optimizedFile  The optimized Schematron file to write.
@@ -55,6 +55,26 @@ public class CdaChEmedSchematronOptimizer {
      */
     public static void optimizeSchematron(@NonNull final File schematronFile,
                                           @NonNull final File optimizedFile,
+                                          @Nullable final String roleToKeep) throws Exception {
+        optimizeSchematron(schematronFile, optimizedFile, Collections.emptyList(), roleToKeep);
+    }
+
+    /**
+     * Optimizes a Schematron file.
+     *
+     * @param schematronFile The original Schematron file to convert.
+     * @param optimizedFile  The optimized Schematron file to write.
+     * @param definitionTransformers   The transformers to apply.
+     * @param roleToKeep     The only assert/report role to keep, or {@code null} to disable filtering.
+     * @throws IOException                  if any IO error occurs.
+     * @throws ParserConfigurationException if the implementation is not available or cannot be instantiated.
+     * @throws SAXException                 if any parsing error occurs.
+     * @throws SchematronParsingException   if the Schematron file is invalid.
+     * @throws TransformerException         if an unrecoverable error occurs during the course of the XML rendering.
+     */
+    public static void optimizeSchematron(@NonNull final File schematronFile,
+                                          @NonNull final File optimizedFile,
+                                          @NonNull final List<DefinitionTransformer> definitionTransformers,
                                           @Nullable final String roleToKeep) throws Exception {
         final SchematronParser parser = new SchematronParser();
         final SchematronDefinition definition = parser.parse(schematronFile);
@@ -94,6 +114,10 @@ public class CdaChEmedSchematronOptimizer {
                     childAssert.setTest(transform(childAssert.getTest()));
                 }
             }
+        }
+
+        for (final var transformer : definitionTransformers) {
+            transformer.transform(definition);
         }
 
         final SchematronWriter writer = new SchematronWriter();
