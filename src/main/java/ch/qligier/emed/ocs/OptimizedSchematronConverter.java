@@ -21,12 +21,12 @@ public class OptimizedSchematronConverter {
     /**
      * Directory in which to read the Schematron files.
      */
-    private static final String SCHEMATRON_INPUT_DIR = "input/0.98.0/";
+    private static final String SCHEMATRON_INPUT_DIR = "input/1.0.2/";
 
     /**
      * Directory in which to write the XSLT files.
      */
-    private static final String SCHEMATRON_OUTPUT_DIR = "dist/0.98.0/";
+    private static final String SCHEMATRON_OUTPUT_DIR = "dist/1.0.2/";
 
     /**
      * List of CDA-CH-EMED Schematron source files.
