@@ -1,5 +1,10 @@
 # Optimized CDA-CH-EMED Schematron
 
+🗄️ This project is **archived** because the CDA-CH-EMED specification is deprecated in favor of CH-EMED. It won't be
+updated anymore.
+
+---
+
 This project provides pre-compiled XSLT files for the CDA-CH-EMED Schematron definitions.
 
 The official CDA-CH-EMED Schematron definitions can be downloaded from
